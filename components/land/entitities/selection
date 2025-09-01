@@ -1,0 +1,40 @@
+{
+  "name": "Selection",
+  "type": "object",
+  "properties": {
+    "land_id": {
+      "type": "string",
+      "description": "ID of the selected land"
+    },
+    "user_notes": {
+      "type": "string",
+      "description": "User's notes about the selection"
+    },
+    "intended_crop": {
+      "type": "string",
+      "description": "Crop the user intends to grow"
+    },
+    "budget": {
+      "type": "number",
+      "description": "User's budget"
+    },
+    "selection_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of selection"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "interested",
+        "contacted",
+        "negotiating",
+        "finalized"
+      ],
+      "default": "interested"
+    }
+  },
+  "required": [
+    "land_id"
+  ]
+}

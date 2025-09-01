@@ -1,0 +1,136 @@
+import React, { useState, useEffect } from "react";
+import { Policy } from "@/entities/Policy";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ScrollText, ExternalLink, Check, Calendar, Building, Tag } from "lucide-react";
+import { format } from "date-fns";
+
+export default function Policies() {
+  const [policies, setPolicies] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPolicies();
+  }, []);
+
+  const loadPolicies = async () => {
+    try {
+      const data = await Policy.list("-launch_date");
+      setPolicies(data);
+    } catch (error) {
+      console.error("Error loading policies:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const getCategoryColor = (category) => {
+    const colors = {
+      subsidy: "bg-blue-100 text-blue-800 border-blue-200",
+      insurance: "bg-green-100 text-green-800 border-green-200",
+      credit: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      technology: "bg-purple-100 text-purple-800 border-purple-200",
+      market_support: "bg-orange-100 text-orange-800 border-orange-200",
+      welfare: "bg-pink-100 text-pink-800 border-pink-200",
+    };
+    return colors[category] || "bg-gray-100 text-gray-800 border-gray-200";
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
+          <p className="text-emerald-700 font-medium">Loading Government Policies...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
+      <div className="max-w-5xl mx-auto p-6 lg:p-12">
+        <div className="mb-12">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Agricultural <span className="bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent">Policies</span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl">
+            Stay informed about the latest government schemes and policies designed to support Indian farmers and promote agricultural growth.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          {policies.map((policy) => (
+            <Card key={policy.id} className="shadow-lg border-0 hover:shadow-xl transition-all duration-300">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <CardTitle className="text-2xl text-gray-900">{policy.title}</CardTitle>
+                  <Badge className={`${getCategoryColor(policy.category)} border px-3 py-1 text-sm`}>
+                    <Tag className="w-4 h-4 mr-2" />
+                    {policy.category.replace('_', ' ').toUpperCase()}
+                  </Badge>
+                </div>
+                <div className="text-sm text-gray-500 pt-2 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-6">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4" />
+                    <span>{policy.ministry}</span>
+                  </div>
+                  {policy.launch_date && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Launched: {format(new Date(policy.launch_date), "MMM, yyyy")}</span>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <p className="text-gray-700 leading-relaxed mb-4">{policy.description}</p>
+                    <AccordionTrigger>Read More</AccordionTrigger>
+                    <AccordionContent className="pt-4">
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-2">Key Benefits</h4>
+                          <ul className="space-y-2">
+                            {policy.key_benefits?.map((benefit, index) => (
+                              <li key={index} className="flex items-start gap-2">
+                                <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-1" />
+                                <span className="text-gray-700">{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-2">Eligibility</h4>
+                          <p className="text-gray-700">{policy.eligibility}</p>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+              {policy.link_url && (
+                <CardFooter>
+                  <a href={policy.link_url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Official Website
+                    </Button>
+                  </a>
+                </CardFooter>
+              )}
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

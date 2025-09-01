@@ -1,0 +1,161 @@
+import React from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { 
+  MapPin, 
+  Thermometer, 
+  Droplets, 
+  Leaf, 
+  IndianRupee,
+  User,
+  Phone
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+
+export default function LandCard({ land, index }) {
+  const soilTypeLabels = {
+    black_soil: "Black Soil",
+    red_soil: "Red Soil", 
+    alluvial: "Alluvial",
+    sandy: "Sandy",
+    clayey: "Clayey"
+  };
+
+  const waterSourceLabels = {
+    borewell: "Borewell",
+    canal: "Canal",
+    river: "River",
+    rain_dependent: "Rain Dependent",
+    tank: "Tank"
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+    >
+      <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden group">
+        <div className="relative">
+          <div className="h-48 bg-gradient-to-br from-emerald-200 to-green-300 relative overflow-hidden">
+            {land.image_url ? (
+              <img 
+                src={land.image_url} 
+                alt={land.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Leaf className="w-16 h-16 text-white opacity-80" />
+              </div>
+            )}
+            <div className="absolute top-4 right-4">
+              <Badge className="bg-emerald-500 text-white border-0 shadow-lg">
+                Available
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">{land.title}</h3>
+              <div className="flex items-center gap-2 text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">{land.location}, {land.state}</span>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {/* Key Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-emerald-50 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-emerald-700">{land.size_acres}</div>
+              <div className="text-sm text-emerald-600">Acres</div>
+            </div>
+            <div className="bg-green-50 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-green-700 flex items-center">
+                <IndianRupee className="w-5 h-5" />
+                {(land.price_per_acre / 1000).toFixed(0)}K
+              </div>
+              <div className="text-sm text-green-600">Per Acre</div>
+            </div>
+          </div>
+
+          {/* Soil & Water */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
+              {soilTypeLabels[land.soil_type]}
+            </Badge>
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+              <Droplets className="w-3 h-3 mr-1" />
+              {waterSourceLabels[land.water_source]}
+            </Badge>
+          </div>
+
+          {/* Weather Info */}
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              <Thermometer className="w-4 h-4" />
+              <span>{land.current_temperature}°C</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Droplets className="w-4 h-4" />
+              <span>{land.humidity}% Humidity</span>
+            </div>
+          </div>
+
+          {/* Suitable Crops */}
+          {land.suitable_crops && land.suitable_crops.length > 0 && (
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <Leaf className="w-4 h-4" />
+                Suitable Crops
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {land.suitable_crops.slice(0, 3).map((crop) => (
+                  <Badge key={crop} variant="outline" className="text-xs border-emerald-200 text-emerald-700">
+                    {crop}
+                  </Badge>
+                ))}
+                {land.suitable_crops.length > 3 && (
+                  <Badge variant="outline" className="text-xs border-gray-200 text-gray-600">
+                    +{land.suitable_crops.length - 3} more
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Contact Info */}
+          <div className="border-t pt-3">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <User className="w-4 h-4" />
+                <span>{land.owner_name}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Phone className="w-4 h-4" />
+                <span>{land.contact_number}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <Link to={createPageUrl(`LandDetail?id=${land.id}`)}>
+            <Button className="w-full bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              View Details & Select
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}

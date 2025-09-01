@@ -1,0 +1,265 @@
+import React, { useState, useEffect } from "react";
+import { Selection, Land } from "@/entities/all";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  FileCheck, 
+  MapPin, 
+  IndianRupee, 
+  Leaf, 
+  Calendar,
+  Phone,
+  User,
+  Eye,
+  Trash2
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { format } from "date-fns";
+
+export default function Summary() {
+  const [selections, setSelections] = useState([]);
+  const [landsData, setLandsData] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSelections();
+  }, []);
+
+  const loadSelections = async () => {
+    try {
+      const selectionsData = await Selection.list("-created_date");
+      setSelections(selectionsData);
+
+      // Load land details for each selection
+      const lands = await Land.list();
+      const landsMap = {};
+      lands.forEach(land => {
+        landsMap[land.id] = land;
+      });
+      setLandsData(landsMap);
+    } catch (error) {
+      console.error("Error loading selections:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      interested: "bg-blue-100 text-blue-800 border-blue-200",
+      contacted: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      negotiating: "bg-orange-100 text-orange-800 border-orange-200",
+      finalized: "bg-green-100 text-green-800 border-green-200"
+    };
+    return colors[status] || colors.interested;
+  };
+
+  const getTotalBudget = () => {
+    return selections.reduce((total, selection) => total + (selection.budget || 0), 0);
+  };
+
+  const getTotalAcres = () => {
+    return selections.reduce((total, selection) => {
+      const land = landsData[selection.land_id];
+      return total + (land?.size_acres || 0);
+    }, 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
+          <p className="text-emerald-700 font-medium">Loading your selections...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
+      <div className="max-w-6xl mx-auto p-6 lg:p-12">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            My <span className="bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent">Selections</span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl">
+            Here's a summary of all the lands you've selected. Track your progress and manage your agricultural investments.
+          </p>
+        </motion.div>
+
+        {selections.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16"
+          >
+            <div className="w-24 h-24 mx-auto mb-6 bg-emerald-100 rounded-full flex items-center justify-center">
+              <FileCheck className="w-12 h-12 text-emerald-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-700 mb-4">No Selections Yet</h3>
+            <p className="text-gray-500 mb-8">Start exploring available lands and make your first selection</p>
+            <Link to={createPageUrl("Lands")}>
+              <Button className="bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <MapPin className="w-5 h-5 mr-2" />
+                Browse Available Lands
+              </Button>
+            </Link>
+          </motion.div>
+        ) : (
+          <>
+            {/* Summary Stats */}
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <Card className="bg-emerald-50 border-emerald-200 shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <FileCheck className="w-12 h-12 mx-auto mb-4 text-emerald-600" />
+                  <div className="text-3xl font-bold text-emerald-700">{selections.length}</div>
+                  <div className="text-emerald-600 font-medium">Land{selections.length !== 1 ? 's' : ''} Selected</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-50 border-green-200 shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <IndianRupee className="w-12 h-12 mx-auto mb-4 text-green-600" />
+                  <div className="text-3xl font-bold text-green-700">
+                    ₹{(getTotalBudget() / 100000).toFixed(1)}L
+                  </div>
+                  <div className="text-green-600 font-medium">Total Budget</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-lime-50 border-lime-200 shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <Leaf className="w-12 h-12 mx-auto mb-4 text-lime-600" />
+                  <div className="text-3xl font-bold text-lime-700">{getTotalAcres()}</div>
+                  <div className="text-lime-600 font-medium">Total Acres</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Selections List */}
+            <div className="space-y-6">
+              {selections.map((selection, index) => {
+                const land = landsData[selection.land_id];
+                if (!land) return null;
+
+                return (
+                  <motion.div
+                    key={selection.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <Card className="shadow-lg border-0 hover:shadow-xl transition-all duration-300">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-2xl text-gray-900">{land.title}</CardTitle>
+                            <div className="flex items-center gap-2 text-gray-600 mt-2">
+                              <MapPin className="w-4 h-4" />
+                              <span>{land.location}, {land.state}</span>
+                            </div>
+                          </div>
+                          <Badge className={`${getStatusColor(selection.status)} border px-3 py-1`}>
+                            {selection.status.replace('_', ' ').toUpperCase()}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {/* Land Details Grid */}
+                        <div className="grid md:grid-cols-4 gap-4">
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-lg font-bold text-gray-900">{land.size_acres} Acres</div>
+                            <div className="text-sm text-gray-600">Land Size</div>
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-lg font-bold text-gray-900 flex items-center">
+                              <IndianRupee className="w-4 h-4" />
+                              {(land.price_per_acre / 1000).toFixed(0)}K
+                            </div>
+                            <div className="text-sm text-gray-600">Per Acre</div>
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-lg font-bold text-gray-900">
+                              ₹{(selection.budget / 100000).toFixed(1)}L
+                            </div>
+                            <div className="text-sm text-gray-600">Your Budget</div>
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="text-lg font-bold text-gray-900">{selection.intended_crop}</div>
+                            <div className="text-sm text-gray-600">Intended Crop</div>
+                          </div>
+                        </div>
+
+                        {/* Selection Info */}
+                        <div className="border-t pt-4">
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2">Selection Details</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-gray-500" />
+                                  <span>Selected on {format(new Date(selection.created_date), "MMM d, yyyy")}</span>
+                                </div>
+                                {selection.user_notes && (
+                                  <div>
+                                    <span className="text-gray-600">Notes: </span>
+                                    <span className="text-gray-900">{selection.user_notes}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2">Owner Contact</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <User className="w-4 h-4 text-gray-500" />
+                                  <span>{land.owner_name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Phone className="w-4 h-4 text-gray-500" />
+                                  <span>{land.contact_number}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 pt-4">
+                          <Link to={createPageUrl(`LandDetail?id=${land.id}`)}>
+                            <Button variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Details
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Action Section */}
+            <div className="mt-12 text-center">
+              <Link to={createPageUrl("Lands")}>
+                <Button className="bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  Explore More Lands
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

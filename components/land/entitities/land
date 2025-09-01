@@ -1,0 +1,99 @@
+{
+  "name": "Land",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Land title/name"
+    },
+    "location": {
+      "type": "string",
+      "description": "Location of the land"
+    },
+    "state": {
+      "type": "string",
+      "description": "State in India"
+    },
+    "district": {
+      "type": "string",
+      "description": "District"
+    },
+    "size_acres": {
+      "type": "number",
+      "description": "Size of land in acres"
+    },
+    "price_per_acre": {
+      "type": "number",
+      "description": "Price per acre in INR"
+    },
+    "soil_type": {
+      "type": "string",
+      "enum": [
+        "black_soil",
+        "red_soil",
+        "alluvial",
+        "sandy",
+        "clayey"
+      ],
+      "description": "Type of soil"
+    },
+    "water_source": {
+      "type": "string",
+      "enum": [
+        "borewell",
+        "canal",
+        "river",
+        "rain_dependent",
+        "tank"
+      ],
+      "description": "Primary water source"
+    },
+    "suitable_crops": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of suitable crops for this land"
+    },
+    "current_temperature": {
+      "type": "number",
+      "description": "Current temperature in Celsius"
+    },
+    "humidity": {
+      "type": "number",
+      "description": "Humidity percentage"
+    },
+    "rainfall_annual": {
+      "type": "number",
+      "description": "Annual rainfall in mm"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Image of the land"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Land owner name"
+    },
+    "contact_number": {
+      "type": "string",
+      "description": "Contact number"
+    },
+    "description": {
+      "type": "string",
+      "description": "Additional details about the land"
+    },
+    "available": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether land is available"
+    }
+  },
+  "required": [
+    "title",
+    "location",
+    "state",
+    "size_acres",
+    "price_per_acre"
+  ]
+}

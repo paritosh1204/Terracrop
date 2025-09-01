@@ -1,0 +1,55 @@
+{
+  "name": "Policy",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Official name of the policy"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the policy"
+    },
+    "ministry": {
+      "type": "string",
+      "description": "Governing ministry (e.g., Ministry of Agriculture & Farmers Welfare)"
+    },
+    "launch_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the policy was launched"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "subsidy",
+        "insurance",
+        "credit",
+        "technology",
+        "market_support",
+        "welfare"
+      ],
+      "description": "Category of the policy"
+    },
+    "eligibility": {
+      "type": "string",
+      "description": "Who is eligible for this policy"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "Official URL for more information"
+    },
+    "key_benefits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of key benefits for farmers"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "category"
+  ]
+}
